@@ -752,7 +752,6 @@ def train(args):
                     if args.fused_optimizer_groups:
                         for i in range(1, len(optimizers)):
                             lr_schedulers[i].step()
-
             # Checks if the accelerator has performed an optimization step behind the scenes
             if accelerator.sync_gradients:
                 progress_bar.update(1)

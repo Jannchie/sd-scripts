@@ -96,7 +96,7 @@ DEFAULT_EPOCH_NAME = "epoch"
 DEFAULT_LAST_OUTPUT_NAME = "last"
 
 DEFAULT_STEP_NAME = "at"
-STEP_STATE_NAME = "{}-step{:08d}-state"
+STEP_STATE_NAME = "{}-step-state"
 STEP_FILE_NAME = "{}-step{:08d}"
 STEP_DIFFUSERS_DIR_NAME = "{}-step{:08d}"
 
@@ -4940,11 +4940,12 @@ def save_and_remove_state_stepwise(args: argparse.Namespace, accelerator, step_n
     logger.info(f"saving state at step {step_no}")
     os.makedirs(args.output_dir, exist_ok=True)
 
-    state_dir = os.path.join(args.output_dir, STEP_STATE_NAME.format(model_name, step_no))
+    state_dir = os.path.join(args.output_dir, STEP_STATE_NAME.format(model_name))
     accelerator.save_state(state_dir)
+    logger.info("state saved.")
     if args.save_state_to_huggingface:
         logger.info("uploading state to huggingface.")
-        huggingface_util.upload(args, state_dir, "/" + STEP_STATE_NAME.format(model_name, step_no))
+        huggingface_util.upload(args, state_dir, "/" + STEP_STATE_NAME.format(model_name))
 
     last_n_steps = args.save_last_n_steps_state if args.save_last_n_steps_state else args.save_last_n_steps
     if last_n_steps is not None:
@@ -4953,7 +4954,7 @@ def save_and_remove_state_stepwise(args: argparse.Namespace, accelerator, step_n
         remove_step_no = remove_step_no - (remove_step_no % args.save_every_n_steps)
 
         if remove_step_no > 0:
-            state_dir_old = os.path.join(args.output_dir, STEP_STATE_NAME.format(model_name, remove_step_no))
+            state_dir_old = os.path.join(args.output_dir, STEP_STATE_NAME.format(model_name))
             if os.path.exists(state_dir_old):
                 logger.info(f"removing old state: {state_dir_old}")
                 shutil.rmtree(state_dir_old)

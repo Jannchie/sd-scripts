@@ -40,3 +40,5 @@ imagesize==1.4.1
 rich==13.7.0
 # for kohya_ss library
 -e .
+
+nvitop
