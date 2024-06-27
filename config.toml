@@ -1,0 +1,71 @@
+seed = 47
+
+pretrained_model_name_or_path = "/mnt/nfs-mnj-hot-09/tmp/pan/model/creative-xl-1.0-step00008400.safetensors"
+vae = 'madebyollin/sdxl-vae-fp16-fix'
+train_data_dir = '/mnt/nfs-mnj-hot-09/tmp/aibooru_full'
+in_json = '/mnt/nfs-mnj-hot-09/tmp/aibooru_full/meta.json'
+output_dir = '/mnt/nfs-mnj-hot-09/tmp/pan/model'
+output_name = 'creative-xl-1.0'
+save_precision = 'fp16'
+save_every_n_epochs = 1
+save_every_n_steps = 300
+save_model_as = "safetensors"
+
+save_state = true
+
+recursive = true
+enable_bucket = true
+resolution = "1536, 1536"
+
+max_data_loader_n_workers = 0
+
+vae_batch_size = 1
+train_batch_size = 16
+mixed_precision = "fp16"
+# max_token_length = 225
+
+ddp_gradient_as_bucket_view = true
+ddp_static_graph = true
+ddp_timeout = 100000
+
+min_timestep = 0
+max_timestep = 1000
+max_train_epochs = 10
+
+# max_bucket_reso = 1536
+# min_bucket_reso = 640
+# bucket_reso_steps = 64
+
+
+
+optimizer_type = "AdamW"
+learning_rate = 1e-5
+train_text_encoder = true
+learning_rate_te2 = 0
+optimizer_args = ["weight_decay=0.1", "betas=0.9,0.99"]
+lr_scheduler = "cosine_with_restarts"
+lr_scheduler_num_cycles = 10
+lr_scheduler_type = "LoraEasyCustomOptimizer.CustomOptimizers.CosineAnnealingWarmupRestarts"
+lr_scheduler_args = ["min_lr=1e-06", "gamma=0.9", "first_cycle_steps=4000"]
+max_grad_norm = 1.0
+
+xformers = true
+gradient_accumulation_steps = 3
+# no_half_vae = true
+# train_text_encoder = false
+
+full_fp16 = false
+gradient_checkpointing = true
+# torch_compile = true
+# deepspeed = true
+# zero_stage = 2
+# zero3_init_flag = true
+# fp16_master_weights_and_gradients = true
+
+
+resume = '/mnt/nfs-mnj-hot-09/tmp/pan/model/creative-xl-1.0-step-state'
+sample_prompts = '/mnt/nfs-mnj-archive-12/group/creative/pan/sd-scripts/sample_prompts.txt'
+sample_at_first = true
+sample_every_n_steps = 100
+sample_sampler = 'k_euler_a'
+logging_dir = 'logs'

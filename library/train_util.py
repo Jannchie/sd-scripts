@@ -4910,6 +4910,13 @@ def save_sd_model_on_epoch_end_or_stepwise_common(
         else:
             save_and_remove_state_stepwise(args, accelerator, global_step)
 
+    # save global step and epoch
+    state_dir = os.path.join(args.output_dir, STEP_STATE_NAME.format(model_name))
+    train_state_file = os.path.join(state_dir, "train_state.json")
+    # +1 is needed because the state is saved before current_step is set from global_step
+    logger.info(f"save train state to {train_state_file} at epoch {epoch_no} step {global_step}")
+    with open(train_state_file, "w", encoding="utf-8") as f:
+        json.dump({"current_epoch": epoch_no, "current_step": global_step }, f)
 
 def save_and_remove_state_on_epoch_end(args: argparse.Namespace, accelerator, epoch_no):
     model_name = default_if_none(args.output_name, DEFAULT_EPOCH_NAME)

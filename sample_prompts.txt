@@ -1,0 +1,17 @@
+# prompt 1
+1girl, solo, blue eyes, navel, short hair, looking at viewer, shorts, midriff, hair between eyes, simple background, belt, weapon, gloves, pantyhose, short shorts, blue hair, detached sleeves, crop top, breasts, parted lips, long sleeves, blush, black hair, small breasts --w 832 --h 1216 --d 47 --l 7 --s 20
+
+# prompt 2
+1girl, solo, long hair, open mouth, breasts, smile, green eyes, white background, blush, jacket, blonde hair, looking at viewer, simple background, belt, shirt, open clothes, :d, jacket on shoulders, medium breasts, collarbone, long sleeves, white belt --w 1024 --h 1024 --d 47 --l 7 --s 20
+
+# prompt 3
+1boy, solo, brown eyes, choker, looking at viewer, grey hair --w 1344 --h 768 --d 47 --l 7 --s 20
+
+# prompt 4
+1boy, adjusting footwear, bangs, black pants, blonde hair, closed mouth, denim, drawstring, eyebrows visible through hair, full body, hair between eyes, hand up, high collar, highres, holding, holding cup, hood, hood down --w 1344 --h 768 --d 47 --l 7 --s 20
+
+# prompt 5
+1boy, solo --w 1024 --h 1024 --d 47 --l 7 --s 20
+
+# prompt 6
+1girl, solo --w 1024 --h 1024 --d 47 --l 7 --s 20

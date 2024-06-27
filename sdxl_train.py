@@ -280,8 +280,8 @@ def train(args):
         # TODO each option for two text encoders?
         accelerator.print("enable text encoder training")
         if args.gradient_checkpointing:
-            text_encoder1.gradient_checkpointing_enable()
-            text_encoder2.gradient_checkpointing_enable()
+            text_encoder1.gradient_checkpointing_enable({"use_reentrant": True})
+            text_encoder2.gradient_checkpointing_enable({"use_reentrant": True})
         lr_te1 = args.learning_rate_te1 if args.learning_rate_te1 is not None else args.learning_rate  # 0 means not train
         lr_te2 = args.learning_rate_te2 if args.learning_rate_te2 is not None else args.learning_rate  # 0 means not train
         train_text_encoder1 = lr_te1 != 0
@@ -558,6 +558,18 @@ def train(args):
     if (args.save_n_epoch_ratio is not None) and (args.save_n_epoch_ratio > 0):
         args.save_every_n_epochs = math.floor(num_train_epochs / args.save_n_epoch_ratio) or 1
 
+    if args.resume:
+        state_path = os.path.join(args.resume, "train_state.json")
+        # if path exists, load the state
+        if os.path.exists(state_path):
+            import json
+            # {"current_epoch": epoch_no, "current_step": global_step }
+            states = json.load(open(state_path, "r"))
+            current_epoch.value = states["current_epoch"]
+            current_step.value = states["current_step"]
+    
+    # モデルのパラメータを表示する
+
     # 学習する
     # total_batch_size = args.train_batch_size * accelerator.num_processes * args.gradient_accumulation_steps
     accelerator.print("running training / 学習開始")
@@ -574,7 +586,18 @@ def train(args):
     accelerator.print(f"  total optimization steps / 学習ステップ数: {args.max_train_steps}")
 
     progress_bar = tqdm(range(args.max_train_steps), smoothing=0, disable=not accelerator.is_local_main_process, desc="steps")
-    global_step = 0
+    
+    # to current step
+    progress_bar.update(current_step.value)
+    global_step = current_step.value
+
+    # 计算当前的 epoch 内的 step。
+    steps_in_current_epoch = global_step % num_update_steps_per_epoch
+    # 对于 dataset，空过当前的 epoch 内的 step * gradient_accumulation_steps 个 batch。
+    batch_skip = steps_in_current_epoch * args.gradient_accumulation_steps
+    skipped_dataloader = accelerator.skip_first_batches(train_dataloader, batch_skip)
+    accelerator.print(f"Skipping {batch_skip} batches in the current epoch.")
+
 
     noise_scheduler = DDPMScheduler(
         beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear", num_train_timesteps=1000, clip_sample=False
@@ -600,15 +623,24 @@ def train(args):
         accelerator, args, 0, global_step, accelerator.device, vae, [tokenizer1, tokenizer2], [text_encoder1, text_encoder2], unet
     )
 
+    first_epoch = True
     loss_recorder = train_util.LossRecorder()
-    for epoch in range(num_train_epochs):
+    for epoch in range(current_epoch.value, num_train_epochs):
+        # 决定使用 skip 的 dataloader 还是正常的 dataloader。
+        if first_epoch:
+            dataloader = skipped_dataloader
+            first_epoch = False
+            accelerator.print("Skipping the first epoch.")
+        else:
+            dataloader = train_dataloader
+            accelerator.print("Using the normal dataloader.")
         accelerator.print(f"\nepoch {epoch+1}/{num_train_epochs}")
         current_epoch.value = epoch + 1
 
         for m in training_models:
             m.train()
 
-        for step, batch in enumerate(train_dataloader):
+        for step, batch in enumerate(dataloader):
             current_step.value = global_step
 
             if args.fused_optimizer_groups:
